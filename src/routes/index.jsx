@@ -10,6 +10,7 @@ import Postos from "../pages/Postos";
 import Usuarios from "../pages/Usuarios";
 import MovimentacoesAcessos from "../pages/MovimentacoesAcessos";
 import MovimentacoesFrota from "../pages/MovimentacoesFrota";
+import Relatorios from "../pages/Relatorios";
 import Layout from "../components/Layout";
 import PrivateRoutes from "./PrivateRoutes";
 
@@ -33,6 +34,7 @@ export default function AppRoutes() {
             element={<MovimentacoesAcessos />}
           />
           <Route path="/movimentacoes/frota" element={<MovimentacoesFrota />} />
+          <Route path="/relatorios" element={<Relatorios />} />
         </Route>
       </Route>
 
