@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { FaUser, FaLock, FaSpinner } from "react-icons/fa"; // Ícones
+import { useNavigate } from "react-router-dom";
 
 export default function SignIn() {
   const { signIn } = useAuth();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -23,6 +25,7 @@ export default function SignIn() {
 
     try {
       await signIn(email, senha);
+      navigate("/dashboard");
       // Se der certo, o AuthContext atualiza o estado 'user'
       // e o Roteador redireciona automaticamente para o Dashboard.
     } catch (err) {
