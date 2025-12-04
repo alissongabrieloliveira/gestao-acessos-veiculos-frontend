@@ -7,6 +7,7 @@ import Pessoas from "../pages/Pessoas";
 import Veiculos from "../pages/Veiculos";
 import Setores from "../pages/Setores";
 import Postos from "../pages/Postos";
+import Usuarios from "../pages/Usuarios";
 import Layout from "../components/Layout";
 import PrivateRoutes from "./PrivateRoutes";
 
@@ -24,6 +25,7 @@ export default function AppRoutes() {
           <Route path="/veiculos" element={<Veiculos />} />
           <Route path="/setores" element={<Setores />} />
           <Route path="/postos" element={<Postos />} />
+          <Route path="/usuarios" element={<Usuarios />} />
         </Route>
       </Route>
 
