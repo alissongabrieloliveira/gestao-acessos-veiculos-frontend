@@ -3,25 +3,25 @@ import { Routes, Route } from "react-router-dom";
 
 import SignIn from "../pages/SignIn";
 import Dashboard from "../pages/Dashboard";
-
+import Layout from "../components/Layout";
 import PrivateRoutes from "./PrivateRoutes";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Rota Pública */}
       <Route path="/" element={<SignIn />} />
 
-      {/* Grupo de Rotas Privadas */}
+      {/* Rotas Privadas */}
       <Route element={<PrivateRoutes />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Envolvemos todas as rotas internas no Layout */}
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Futuras rotas virão aqui: */}
-        {/* <Route path="/usuarios" element={<UsuariosList />} /> */}
-        {/* <Route path="/pessoas" element={<PessoasList />} /> */}
+          {/* Adicionaremos as outras rotas futuramente */}
+          {/* <Route path="/pessoas" element={<Pessoas />} /> */}
+        </Route>
       </Route>
 
-      {/* Rota Coringa (404) - Se digitar URL errada, volta pro login */}
       <Route path="*" element={<SignIn />} />
     </Routes>
   );
