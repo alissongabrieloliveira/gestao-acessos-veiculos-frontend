@@ -5,6 +5,7 @@ import SignIn from "../pages/SignIn";
 import Dashboard from "../pages/Dashboard";
 import Pessoas from "../pages/Pessoas";
 import Veiculos from "../pages/Veiculos";
+import Setores from "../pages/Setores";
 import Layout from "../components/Layout";
 import PrivateRoutes from "./PrivateRoutes";
 
@@ -20,6 +21,7 @@ export default function AppRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/pessoas" element={<Pessoas />} />
           <Route path="/veiculos" element={<Veiculos />} />
+          <Route path="/setores" element={<Setores />} />
         </Route>
       </Route>
 
