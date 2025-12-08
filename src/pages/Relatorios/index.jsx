@@ -1,23 +1,33 @@
 import React, { useState } from "react";
 import api from "../../services/api";
-import { FaSearch, FaFilePdf, FaCalendarAlt, FaEraser } from "react-icons/fa";
+import {
+  FaSearch,
+  FaFilePdf,
+  FaCalendarAlt,
+  FaEraser,
+  FaFilter,
+  FaCar,
+  FaUser,
+  FaExchangeAlt,
+} from "react-icons/fa";
 
 export default function Relatorios() {
   const [tipoRelatorio, setTipoRelatorio] = useState("acessos");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
 
-  // Novos Estados
   const [buscaNome, setBuscaNome] = useState("");
   const [buscaPlaca, setBuscaPlaca] = useState("");
 
   const [resultados, setResultados] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
 
   async function handleGerarRelatorio(e) {
-    if (e) e.preventDefault(); // Permite chamar sem evento (botão limpar)
+    if (e) e.preventDefault();
     setLoading(true);
     setResultados([]);
+    setFiltrosAplicados(true);
 
     try {
       let url =
@@ -28,8 +38,6 @@ export default function Relatorios() {
 
       if (dataInicio) params.data_inicio = dataInicio;
       if (dataFim) params.data_fim = dataFim;
-
-      // Envia os novos filtros se estiverem preenchidos
       if (buscaNome) params.nome = buscaNome;
       if (buscaPlaca) params.placa = buscaPlaca;
 
@@ -49,6 +57,7 @@ export default function Relatorios() {
     setBuscaNome("");
     setBuscaPlaca("");
     setResultados([]);
+    setFiltrosAplicados(false);
   }
 
   function handlePrint() {
@@ -56,248 +65,383 @@ export default function Relatorios() {
   }
 
   return (
-    <div>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 print:hidden">
+    <div className="min-h-screen bg-gray-50/50 pb-10">
+      {/* Cabeçalho */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 print:hidden">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Relatórios</h1>
-          <p className="text-gray-500">Histórico de movimentações</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+            Relatórios
+          </h1>
+          <p className="text-gray-500 mt-1">
+            Extraia dados e audite as movimentações do sistema.
+          </p>
         </div>
         <button
           onClick={handlePrint}
           disabled={resultados.length === 0}
-          className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50"
+          className="bg-gray-900 hover:bg-black text-white px-5 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:shadow-none font-medium"
         >
-          <FaFilePdf /> Imprimir / PDF
+          <FaFilePdf className="text-red-400" /> Exportar PDF
         </button>
       </div>
 
-      {/* Área de Filtros */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 print:hidden">
-        <form onSubmit={handleGerarRelatorio}>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
-            {/* Linha 1: Tipo e Datas */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo de Relatório
-              </label>
-              <select
-                className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500"
-                value={tipoRelatorio}
-                onChange={(e) => {
-                  setTipoRelatorio(e.target.value);
-                  setResultados([]);
-                }}
-              >
-                <option value="acessos">Movimentação de Acessos</option>
-                <option value="frota">Movimentação de Frota</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Data Início
-              </label>
-              <input
-                type="date"
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                value={dataInicio}
-                onChange={(e) => setDataInicio(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Data Fim
-              </label>
-              <input
-                type="date"
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                value={dataFim}
-                onChange={(e) => setDataFim(e.target.value)}
-              />
-            </div>
+      {/* CARD DE FILTROS (Design Moderno) */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8 print:hidden">
+        <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+          <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
+            <FaFilter />
           </div>
+          <h2 className="text-lg font-bold text-gray-800">Filtros de Busca</h2>
+        </div>
 
-          {/* Linha 2: Buscas Textuais e Botões */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end border-t border-gray-100 pt-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Buscar por Nome
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: João da Silva"
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                value={buscaNome}
-                onChange={(e) => setBuscaNome(e.target.value)}
-              />
+        <form onSubmit={handleGerarRelatorio}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Coluna 1: Tipo e Datas (Ocupa 5 colunas em telas grandes) */}
+            <div className="lg:col-span-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                  Tipo de Relatório
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                    <FaExchangeAlt />
+                  </div>
+                  <select
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none appearance-none"
+                    value={tipoRelatorio}
+                    onChange={(e) => {
+                      setTipoRelatorio(e.target.value);
+                      setResultados([]);
+                      setFiltrosAplicados(false);
+                    }}
+                  >
+                    <option value="acessos">Movimentação de Acessos</option>
+                    <option value="frota">Movimentação de Frota</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                  Data Início
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                    <FaCalendarAlt />
+                  </div>
+                  <input
+                    type="date"
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    value={dataInicio}
+                    onChange={(e) => setDataInicio(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                  Data Fim
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                    <FaCalendarAlt />
+                  </div>
+                  <input
+                    type="date"
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    value={dataFim}
+                    onChange={(e) => setDataFim(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Buscar por Placa
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: ABC"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 uppercase"
-                value={buscaPlaca}
-                onChange={(e) => setBuscaPlaca(e.target.value.toUpperCase())}
-              />
-            </div>
+            {/* Divisor Vertical (apenas desktop) */}
+            <div className="hidden lg:block w-px bg-gray-200 mx-auto h-full"></div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={limparFiltros}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-md flex items-center justify-center gap-2 flex-1"
-                title="Limpar Filtros"
-              >
-                <FaEraser />
-              </button>
+            {/* Coluna 2: Busca Específica (Ocupa 6 colunas) */}
+            <div className="lg:col-span-6 flex flex-col justify-between">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                    Por Nome
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                      <FaUser />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Ex: João Silva"
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      value={buscaNome}
+                      onChange={(e) => setBuscaNome(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md flex items-center justify-center gap-2 flex-[3]"
-              >
-                {loading ? (
-                  "Buscando..."
-                ) : (
-                  <>
-                    <FaSearch /> Filtrar
-                  </>
-                )}
-              </button>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                    Por Placa
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                      <FaCar />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Ex: ABC"
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none uppercase transition-all"
+                      value={buscaPlaca}
+                      onChange={(e) =>
+                        setBuscaPlaca(e.target.value.toUpperCase())
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Botões de Ação */}
+              <div className="flex gap-3 mt-6 justify-end">
+                <button
+                  type="button"
+                  onClick={limparFiltros}
+                  className="px-6 py-2.5 rounded-lg text-gray-600 font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
+                >
+                  <FaEraser /> Limpar
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-lg font-bold shadow-md shadow-blue-200 transition-all flex items-center gap-2 disabled:opacity-70"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <svg
+                        className="animate-spin h-4 w-4 text-white"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Buscando...
+                    </span>
+                  ) : (
+                    <>
+                      <FaSearch /> Filtrar Resultados
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </form>
       </div>
 
-      {/* Resultados - Tabela Dinâmica (Mantém o mesmo código anterior) */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden print:shadow-none print:border-none">
-        <div className="hidden print:block p-4 text-center border-b">
-          <h2 className="text-xl font-bold">
+      {/* RESULTADOS */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden print:shadow-none print:border-none min-h-[300px]">
+        {/* Header Impressão */}
+        <div className="hidden print:block p-8 text-center border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900">
             Relatório de {tipoRelatorio === "acessos" ? "Acessos" : "Frota"}
           </h2>
-          <p className="text-sm">Gerado em: {new Date().toLocaleString()}</p>
+          <p className="text-gray-500 mt-2">
+            Gerado em: {new Date().toLocaleString()}
+          </p>
         </div>
 
         {resultados.length === 0 ? (
-          <div className="p-12 text-center text-gray-400 print:hidden">
-            <FaCalendarAlt size={48} className="mx-auto mb-4 opacity-30" />
-            <p>Utilize os filtros acima para encontrar registros.</p>
+          <div className="h-full flex flex-col items-center justify-center py-20 text-gray-400 print:hidden">
+            <div
+              className={`p-4 rounded-full mb-4 ${
+                filtrosAplicados ? "bg-red-50 text-red-400" : "bg-gray-50"
+              }`}
+            >
+              {filtrosAplicados ? (
+                <FaSearch size={32} />
+              ) : (
+                <FaFilter size={32} />
+              )}
+            </div>
+            <p className="text-lg font-medium text-gray-500">
+              {filtrosAplicados
+                ? "Nenhum registro encontrado para estes filtros."
+                : "Utilize os filtros acima para gerar o relatório."}
+            </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="bg-gray-50 border-b uppercase text-xs text-gray-700">
-                <tr>
-                  <th className="px-4 py-3">Data/Hora</th>
-                  {tipoRelatorio === "acessos" ? (
-                    <>
-                      <th className="px-4 py-3">Pessoa / Documento</th>
-                      <th className="px-4 py-3">Veículo</th>
-                      <th className="px-4 py-3">Destino</th>
-                      <th className="px-4 py-3">Status</th>
-                    </>
-                  ) : (
-                    <>
-                      <th className="px-4 py-3">Motorista</th>
-                      <th className="px-4 py-3">Veículo</th>
-                      <th className="px-4 py-3">Cidade Destino</th>
-                      <th className="px-4 py-3">KM Percorrido</th>
-                    </>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {resultados.map((item) => (
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      {new Date(item.data_hora_entrada).toLocaleString()}
-                      {item.data_hora_saida && (
-                        <div className="text-xs text-gray-400 mt-1">
-                          Saída:{" "}
-                          {new Date(item.data_hora_saida).toLocaleString()}
-                        </div>
-                      )}
-                    </td>
+          <div>
+            {/* Contador de Registros */}
+            <div className="bg-gray-50 px-6 py-3 border-b border-gray-100 flex justify-between items-center print:hidden">
+              <span className="text-sm font-medium text-gray-500">
+                Registros encontrados:
+              </span>
+              <span className="bg-white border border-gray-200 text-gray-800 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                {resultados.length}
+              </span>
+            </div>
 
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Data/Hora
+                    </th>
                     {tipoRelatorio === "acessos" ? (
                       <>
-                        <td className="px-4 py-3">
-                          <p className="font-bold text-gray-700">
-                            {item.pessoa_nome}
-                          </p>
-                          <span className="text-xs">
-                            {item.pessoa_documento}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          {item.veiculo_placa
-                            ? `${item.veiculo_placa} (${item.veiculo_modelo})`
-                            : "A pé"}
-                        </td>
-                        <td className="px-4 py-3">
-                          {item.setor_nome} <br />
-                          <span className="text-xs text-gray-400">
-                            Posto: {item.posto_entrada_nome}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`px-2 py-1 rounded text-xs font-bold ${
-                              item.status === "patio"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            {item.status.toUpperCase()}
-                          </span>
-                        </td>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Pessoa / Veículo
+                        </th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Localização
+                        </th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
                       </>
                     ) : (
                       <>
-                        <td className="px-4 py-3 font-bold text-gray-700">
-                          {item.motorista_nome}
-                        </td>
-                        <td className="px-4 py-3">
-                          {item.modelo} <br />
-                          <span className="text-xs font-mono bg-gray-100 px-1">
-                            {item.placa}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          {item.cidade_destino} ({item.cidade_uf})
-                        </td>
-                        <td className="px-4 py-3">
-                          <div>Saída: {item.km_entrada}</div>
-                          {item.km_saida ? (
-                            <>
-                              <div>Chegada: {item.km_saida}</div>
-                              <div className="font-bold text-blue-600 mt-1">
-                                Total: {item.km_saida - item.km_entrada} km
-                              </div>
-                            </>
-                          ) : (
-                            <span className="text-yellow-600 text-xs">
-                              Em viagem
-                            </span>
-                          )}
-                        </td>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Motorista / Veículo
+                        </th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Destino
+                        </th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Quilometragem
+                        </th>
                       </>
                     )}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {resultados.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-blue-50/30 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-bold text-gray-900">
+                          {new Date(
+                            item.data_hora_entrada
+                          ).toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(item.data_hora_entrada)
+                            .toLocaleTimeString()
+                            .slice(0, 5)}
+                          {item.data_hora_saida &&
+                            ` - ${new Date(item.data_hora_saida)
+                              .toLocaleTimeString()
+                              .slice(0, 5)}`}
+                        </div>
+                      </td>
+
+                      {tipoRelatorio === "acessos" ? (
+                        <>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center">
+                              <div className="ml-0">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {item.pessoa_nome}
+                                </div>
+                                <div className="text-xs text-gray-500 flex items-center gap-1">
+                                  {item.veiculo_placa ? (
+                                    <>
+                                      <FaCar className="text-gray-400" />{" "}
+                                      {item.veiculo_modelo} (
+                                      {item.veiculo_placa})
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FaUser className="text-gray-400" /> A pé
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">
+                              {item.setor_nome}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Posto: {item.posto_entrada_nome}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                item.status === "patio"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {item.status === "patio"
+                                ? "NO PÁTIO"
+                                : "FINALIZADO"}
+                            </span>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-6 py-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {item.motorista_nome}
+                            </div>
+                            <div className="text-xs text-gray-500 flex items-center gap-1">
+                              <FaCar className="text-gray-400" /> {item.modelo}{" "}
+                              ({item.placa})
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 font-medium">
+                              {item.cidade_destino}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {item.cidade_uf}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">
+                              Saída: {item.km_entrada} km
+                            </div>
+                            {item.km_saida ? (
+                              <div className="text-sm text-blue-600 font-bold mt-1">
+                                Total: {item.km_saida - item.km_entrada} km
+                              </div>
+                            ) : (
+                              <span className="text-yellow-600 text-xs font-bold bg-yellow-50 px-2 py-0.5 rounded">
+                                EM VIAGEM
+                              </span>
+                            )}
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
 
-      <div className="hidden print:block mt-8 text-center text-xs text-gray-400">
-        Relatório gerado em {new Date().toLocaleString()} pelo Sistema de
-        Portaria.
+      <div className="hidden print:block mt-8 text-center text-xs text-gray-400 border-t pt-4">
+        Relatório oficial - Sistema de Portaria e Frota
       </div>
     </div>
   );
