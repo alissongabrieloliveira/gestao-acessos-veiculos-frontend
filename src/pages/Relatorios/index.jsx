@@ -85,7 +85,7 @@ export default function Relatorios() {
         </button>
       </div>
 
-      {/* CARD DE FILTROS (Design Moderno) */}
+      {/* CARD DE FILTROS */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8 print:hidden">
         <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
           <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
@@ -96,7 +96,7 @@ export default function Relatorios() {
 
         <form onSubmit={handleGerarRelatorio}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Coluna 1: Tipo e Datas (Ocupa 5 colunas em telas grandes) */}
+            {/* Coluna 1: Tipo e Datas */}
             <div className="lg:col-span-5 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
@@ -156,10 +156,9 @@ export default function Relatorios() {
               </div>
             </div>
 
-            {/* Divisor Vertical (apenas desktop) */}
             <div className="hidden lg:block w-px bg-gray-200 mx-auto h-full"></div>
 
-            {/* Coluna 2: Busca Específica (Ocupa 6 colunas) */}
+            {/* Coluna 2: Busca Específica */}
             <div className="lg:col-span-6 flex flex-col justify-between">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -201,7 +200,6 @@ export default function Relatorios() {
                 </div>
               </div>
 
-              {/* Botões de Ação */}
               <div className="flex gap-3 mt-6 justify-end">
                 <button
                   type="button"
@@ -252,7 +250,6 @@ export default function Relatorios() {
 
       {/* RESULTADOS */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden print:shadow-none print:border-none min-h-[300px]">
-        {/* Header Impressão */}
         <div className="hidden print:block p-8 text-center border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">
             Relatório de {tipoRelatorio === "acessos" ? "Acessos" : "Frota"}
@@ -283,7 +280,6 @@ export default function Relatorios() {
           </div>
         ) : (
           <div>
-            {/* Contador de Registros */}
             <div className="bg-gray-50 px-6 py-3 border-b border-gray-100 flex justify-between items-center print:hidden">
               <span className="text-sm font-medium text-gray-500">
                 Registros encontrados:
@@ -300,19 +296,25 @@ export default function Relatorios() {
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Data/Hora
                     </th>
+
                     {tipoRelatorio === "acessos" ? (
+                      // CABEÇALHO ACESSOS
                       <>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
                           Pessoa / Veículo
                         </th>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          Localização
+                          Setor Visitado
+                        </th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Posto Entrada
                         </th>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
                       </>
                     ) : (
+                      // CABEÇALHO FROTA
                       <>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
                           Motorista / Veículo
@@ -321,7 +323,13 @@ export default function Relatorios() {
                           Destino
                         </th>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          Quilometragem
+                          KM Saída
+                        </th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          KM Chegada
+                        </th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Total
                         </th>
                       </>
                     )}
@@ -351,35 +359,35 @@ export default function Relatorios() {
                       </td>
 
                       {tipoRelatorio === "acessos" ? (
+                        // COLUNAS ACESSOS
                         <>
                           <td className="px-6 py-4">
-                            <div className="flex items-center">
-                              <div className="ml-0">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {item.pessoa_nome}
-                                </div>
-                                <div className="text-xs text-gray-500 flex items-center gap-1">
-                                  {item.veiculo_placa ? (
-                                    <>
-                                      <FaCar className="text-gray-400" />{" "}
-                                      {item.veiculo_modelo} (
-                                      {item.veiculo_placa})
-                                    </>
-                                  ) : (
-                                    <>
-                                      <FaUser className="text-gray-400" /> A pé
-                                    </>
-                                  )}
-                                </div>
-                              </div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {item.pessoa_nome}
+                            </div>
+                            <div className="text-xs text-gray-500 flex items-center gap-1">
+                              {item.veiculo_placa ? (
+                                <>
+                                  <FaCar className="text-gray-400" />{" "}
+                                  {item.veiculo_modelo} ({item.veiculo_placa})
+                                </>
+                              ) : (
+                                <>
+                                  <FaUser className="text-gray-400" /> A pé
+                                </>
+                              )}
                             </div>
                           </td>
+                          {/* Setor separado */}
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                               {item.setor_nome}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              Posto: {item.posto_entrada_nome}
+                            </span>
+                          </td>
+                          {/* Posto separado */}
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-600">
+                              {item.posto_entrada_nome}
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -390,13 +398,12 @@ export default function Relatorios() {
                                   : "bg-green-100 text-green-800"
                               }`}
                             >
-                              {item.status === "patio"
-                                ? "NO PÁTIO"
-                                : "FINALIZADO"}
+                              {item.status.toUpperCase()}
                             </span>
                           </td>
                         </>
                       ) : (
+                        // COLUNAS FROTA
                         <>
                           <td className="px-6 py-4">
                             <div className="text-sm font-medium text-gray-900">
@@ -415,14 +422,24 @@ export default function Relatorios() {
                               {item.cidade_uf}
                             </div>
                           </td>
+                          {/* KM Saída */}
+                          <td className="px-6 py-4 text-sm text-gray-900 font-mono">
+                            {item.km_entrada}
+                          </td>
+                          {/* KM Chegada */}
+                          <td className="px-6 py-4 text-sm text-gray-900 font-mono">
+                            {item.km_saida || (
+                              <span className="text-yellow-600 text-xs font-bold">
+                                ---
+                              </span>
+                            )}
+                          </td>
+                          {/* Total Rodado */}
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
-                              Saída: {item.km_entrada} km
-                            </div>
                             {item.km_saida ? (
-                              <div className="text-sm text-blue-600 font-bold mt-1">
-                                Total: {item.km_saida - item.km_entrada} km
-                              </div>
+                              <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                {item.km_saida - item.km_entrada} km
+                              </span>
                             ) : (
                               <span className="text-yellow-600 text-xs font-bold bg-yellow-50 px-2 py-0.5 rounded">
                                 EM VIAGEM
