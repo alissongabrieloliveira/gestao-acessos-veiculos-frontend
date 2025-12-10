@@ -11,3 +11,56 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* --- Configuração de Impressão (PDF) --- */
+@media print {
+  /* 1. Esconde elementos de navegação e interface */
+  aside,
+  button,
+  nav,
+  .print\:hidden,
+  input,
+  select,
+  label {
+    display: none !important;
+  }
+
+  /* 2. Reseta o Layout para ocupar 100% da folha */
+  body,
+  #root,
+  main,
+  div {
+    background-color: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important; /* Importante para não cortar páginas */
+  }
+
+  /* 3. Estilização da Tabela para Papel */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10pt !important; /* Fonte menor para caber mais dados */
+  }
+
+  th,
+  td {
+    border: 1px solid #e5e7eb !important; /* Bordas finas cinza */
+    padding: 8px !important;
+    color: black !important;
+  }
+
+  thead th {
+    background-color: #f3f4f6 !important; /* Cinza claro no header */
+    color: black !important;
+    -webkit-print-color-adjust: exact; /* Força a impressão da cor de fundo */
+    print-color-adjust: exact;
+  }
+
+  /* 4. Quebra de página inteligente */
+  tr {
+    page-break-inside: avoid;
+  }
+}

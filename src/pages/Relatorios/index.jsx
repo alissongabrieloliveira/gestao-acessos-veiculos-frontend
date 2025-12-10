@@ -9,6 +9,7 @@ import {
   FaCar,
   FaUser,
   FaExchangeAlt,
+  FaShieldAlt,
 } from "react-icons/fa";
 
 export default function Relatorios() {
@@ -21,13 +22,15 @@ export default function Relatorios() {
 
   const [resultados, setResultados] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
+
+  // Guardamos os filtros usados para mostrar no PDF
+  const [filtrosUsados, setFiltrosUsados] = useState(null);
 
   async function handleGerarRelatorio(e) {
     if (e) e.preventDefault();
     setLoading(true);
     setResultados([]);
-    setFiltrosAplicados(true);
+    setFiltrosUsados(null);
 
     try {
       let url =
@@ -43,6 +46,20 @@ export default function Relatorios() {
 
       const response = await api.get(url, { params });
       setResultados(response.data);
+
+      // Salva os filtros para o cabeçalho do PDF
+      setFiltrosUsados({
+        tipo:
+          tipoRelatorio === "acessos"
+            ? "Movimentação de Acessos"
+            : "Movimentação de Frota",
+        inicio: dataInicio
+          ? new Date(dataInicio).toLocaleDateString()
+          : "Início",
+        fim: dataFim ? new Date(dataFim).toLocaleDateString() : "Hoje",
+        nome: buscaNome,
+        placa: buscaPlaca,
+      });
     } catch (error) {
       console.error(error);
       alert("Erro ao gerar relatório.");
@@ -57,7 +74,7 @@ export default function Relatorios() {
     setBuscaNome("");
     setBuscaPlaca("");
     setResultados([]);
-    setFiltrosAplicados(false);
+    setFiltrosUsados(null);
   }
 
   function handlePrint() {
@@ -66,7 +83,63 @@ export default function Relatorios() {
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-10">
-      {/* Cabeçalho */}
+      {/* Cabeçalho de Impressão (SÓ APARECE NO PDF) Este bloco usa a classe 'hidden print:block'*/}
+      <div className="hidden print:block mb-8 border-b-2 border-gray-800 pb-4">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-4">
+            {/* Simulação de Logo */}
+            <div className="w-16 h-16 bg-gray-800 text-white flex items-center justify-center rounded-lg text-2xl font-bold">
+              P
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">PORTARIA PRO</h1>
+              <p className="text-sm text-gray-600">
+                Sistema de Gestão de Segurança e Frota
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <h2 className="text-xl font-bold uppercase text-gray-800">
+              Relatório Analítico
+            </h2>
+            <p className="text-sm text-gray-500">
+              Gerado em: {new Date().toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        {/* Resumo dos Filtros no Papel */}
+        {filtrosUsados && (
+          <div className="mt-6 bg-gray-100 p-4 rounded border border-gray-300 grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p>
+                <strong className="text-gray-700">Tipo:</strong>{" "}
+                {filtrosUsados.tipo}
+              </p>
+              <p>
+                <strong className="text-gray-700">Período:</strong>{" "}
+                {filtrosUsados.inicio} até {filtrosUsados.fim}
+              </p>
+            </div>
+            <div className="text-right">
+              {filtrosUsados.nome && (
+                <p>
+                  Filtro Nome: <strong>{filtrosUsados.nome}</strong>
+                </p>
+              )}
+              {filtrosUsados.placa && (
+                <p>
+                  Filtro Placa: <strong>{filtrosUsados.placa}</strong>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Interface de Tela (Some na impressão graças ao CSS global em index.css) */}
+
+      {/* Cabeçalho Tela */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 print:hidden">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
@@ -85,7 +158,7 @@ export default function Relatorios() {
         </button>
       </div>
 
-      {/* CARD DE FILTROS */}
+      {/* Card de Filtros */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8 print:hidden">
         <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
           <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
@@ -112,7 +185,7 @@ export default function Relatorios() {
                     onChange={(e) => {
                       setTipoRelatorio(e.target.value);
                       setResultados([]);
-                      setFiltrosAplicados(false);
+                      setFiltrosUsados(null);
                     }}
                   >
                     <option value="acessos">Movimentação de Acessos</option>
@@ -215,27 +288,7 @@ export default function Relatorios() {
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-lg font-bold shadow-md shadow-blue-200 transition-all flex items-center gap-2 disabled:opacity-70"
                 >
                   {loading ? (
-                    <span className="flex items-center gap-2">
-                      <svg
-                        className="animate-spin h-4 w-4 text-white"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Buscando...
-                    </span>
+                    <span className="flex items-center gap-2">Buscando...</span>
                   ) : (
                     <>
                       <FaSearch /> Filtrar Resultados
@@ -248,34 +301,21 @@ export default function Relatorios() {
         </form>
       </div>
 
-      {/* RESULTADOS */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden print:shadow-none print:border-none min-h-[300px]">
-        <div className="hidden print:block p-8 text-center border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Relatório de {tipoRelatorio === "acessos" ? "Acessos" : "Frota"}
-          </h2>
-          <p className="text-gray-500 mt-2">
-            Gerado em: {new Date().toLocaleString()}
-          </p>
-        </div>
-
+      {/* Área de Resultados (TABELA)*/}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden print:shadow-none print:border-2 print:border-gray-300 min-h-[300px]">
         {resultados.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center py-20 text-gray-400 print:hidden">
             <div
               className={`p-4 rounded-full mb-4 ${
-                filtrosAplicados ? "bg-red-50 text-red-400" : "bg-gray-50"
+                filtrosUsados ? "bg-red-50 text-red-400" : "bg-gray-50"
               }`}
             >
-              {filtrosAplicados ? (
-                <FaSearch size={32} />
-              ) : (
-                <FaFilter size={32} />
-              )}
+              {filtrosUsados ? <FaSearch size={32} /> : <FaFilter size={32} />}
             </div>
             <p className="text-lg font-medium text-gray-500">
-              {filtrosAplicados
-                ? "Nenhum registro encontrado para estes filtros."
-                : "Utilize os filtros acima para gerar o relatório."}
+              {filtrosUsados
+                ? "Nenhum registro encontrado."
+                : "Utilize os filtros para gerar o relatório."}
             </p>
           </div>
         ) : (
@@ -291,66 +331,64 @@ export default function Relatorios() {
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 border-b border-gray-200 print:bg-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
                       Data/Hora
                     </th>
 
                     {tipoRelatorio === "acessos" ? (
-                      // CABEÇALHO ACESSOS (Com colunas de KM adicionadas)
                       <>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
                           Pessoa / Veículo
                         </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
                           Localização
                         </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          KM Entrada
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
+                          KM Ent.
                         </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          KM Saída
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
+                          KM Sai.
                         </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
                           Status
                         </th>
                       </>
                     ) : (
-                      // CABEÇALHO FROTA
                       <>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
                           Motorista / Veículo
                         </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
                           Destino
                         </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
                           KM Saída
                         </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          KM Chegada
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
+                          KM Cheg.
                         </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
                           Total
                         </th>
                       </>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 print:divide-gray-300">
                   {resultados.map((item) => (
                     <tr
                       key={item.id}
-                      className="hover:bg-blue-50/30 transition-colors"
+                      className="hover:bg-blue-50/30 transition-colors print:border-b print:border-gray-300"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap print:px-2 print:py-2">
                         <div className="text-sm font-bold text-gray-900">
                           {new Date(
                             item.data_hora_entrada
                           ).toLocaleDateString()}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 print:text-black">
                           {new Date(item.data_hora_entrada)
                             .toLocaleTimeString()
                             .slice(0, 5)}
@@ -362,50 +400,40 @@ export default function Relatorios() {
                       </td>
 
                       {tipoRelatorio === "acessos" ? (
-                        // COLUNAS ACESSOS
                         <>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 print:px-2 print:py-2">
                             <div className="text-sm font-medium text-gray-900">
                               {item.pessoa_nome}
                             </div>
-                            <div className="text-xs text-gray-500 flex items-center gap-1">
+                            <div className="text-xs text-gray-500 flex items-center gap-1 print:text-black">
                               {item.veiculo_placa ? (
                                 <>
-                                  <FaCar className="text-gray-400" />{" "}
                                   {item.veiculo_modelo} ({item.veiculo_placa})
                                 </>
                               ) : (
-                                <>
-                                  <FaUser className="text-gray-400" /> A pé
-                                </>
+                                <>A pé</>
                               )}
                             </div>
                           </td>
-                          {/* Localização (Setor e Posto) */}
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 print:px-2 print:py-2">
                             <div>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 print:bg-transparent print:text-black print:border print:border-black print:p-0">
                                 {item.setor_nome}
                               </span>
                             </div>
-                            <div className="text-xs text-gray-400 mt-1">
+                            <div className="text-xs text-gray-400 mt-1 print:text-black">
                               Posto: {item.posto_entrada_nome}
                             </div>
                           </td>
-
-                          {/* KM Entrada */}
-                          <td className="px-6 py-4 text-sm font-mono text-gray-600">
+                          <td className="px-6 py-4 text-sm font-mono text-gray-600 print:px-2 print:py-2 print:text-black">
                             {item.km_entrada || "-"}
                           </td>
-
-                          {/* KM Saída */}
-                          <td className="px-6 py-4 text-sm font-mono text-gray-600">
+                          <td className="px-6 py-4 text-sm font-mono text-gray-600 print:px-2 print:py-2 print:text-black">
                             {item.km_saida || "-"}
                           </td>
-
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 print:px-2 print:py-2">
                             <span
-                              className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full print:bg-transparent print:text-black print:border print:border-black ${
                                 item.status === "patio"
                                   ? "bg-blue-100 text-blue-800"
                                   : "bg-green-100 text-green-800"
@@ -416,47 +444,36 @@ export default function Relatorios() {
                           </td>
                         </>
                       ) : (
-                        // COLUNAS FROTA
                         <>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 print:px-2 print:py-2">
                             <div className="text-sm font-medium text-gray-900">
                               {item.motorista_nome}
                             </div>
-                            <div className="text-xs text-gray-500 flex items-center gap-1">
-                              <FaCar className="text-gray-400" /> {item.modelo}{" "}
-                              ({item.placa})
+                            <div className="text-xs text-gray-500 flex items-center gap-1 print:text-black">
+                              {item.modelo} ({item.placa})
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 print:px-2 print:py-2">
                             <div className="text-sm text-gray-900 font-medium">
                               {item.cidade_destino}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 print:text-black">
                               {item.cidade_uf}
                             </div>
                           </td>
-                          {/* KM Saída */}
-                          <td className="px-6 py-4 text-sm text-gray-900 font-mono">
+                          <td className="px-6 py-4 text-sm text-gray-900 font-mono print:px-2 print:py-2">
                             {item.km_entrada}
                           </td>
-                          {/* KM Chegada */}
-                          <td className="px-6 py-4 text-sm text-gray-900 font-mono">
-                            {item.km_saida || (
-                              <span className="text-yellow-600 text-xs font-bold">
-                                ---
-                              </span>
-                            )}
+                          <td className="px-6 py-4 text-sm text-gray-900 font-mono print:px-2 print:py-2">
+                            {item.km_saida || "---"}
                           </td>
-                          {/* Total Rodado */}
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 print:px-2 print:py-2">
                             {item.km_saida ? (
-                              <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                              <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded print:bg-transparent print:text-black">
                                 {item.km_saida - item.km_entrada} km
                               </span>
                             ) : (
-                              <span className="text-yellow-600 text-xs font-bold bg-yellow-50 px-2 py-0.5 rounded">
-                                EM VIAGEM
-                              </span>
+                              <span className="text-xs font-bold">VIAGEM</span>
                             )}
                           </td>
                         </>
@@ -470,8 +487,9 @@ export default function Relatorios() {
         )}
       </div>
 
-      <div className="hidden print:block mt-8 text-center text-xs text-gray-400 border-t pt-4">
-        Relatório oficial - Sistema de Portaria e Frota
+      {/* Rodapé Impressão */}
+      <div className="hidden print:block mt-8 text-center text-xs text-gray-500 border-t border-gray-300 pt-2">
+        Documento gerado eletronicamente.
       </div>
     </div>
   );
