@@ -298,16 +298,19 @@ export default function Relatorios() {
                     </th>
 
                     {tipoRelatorio === "acessos" ? (
-                      // CABEÇALHO ACESSOS
+                      // CABEÇALHO ACESSOS (Com colunas de KM adicionadas)
                       <>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
                           Pessoa / Veículo
                         </th>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          Setor Visitado
+                          Localização
                         </th>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          Posto Entrada
+                          KM Entrada
+                        </th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          KM Saída
                         </th>
                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
                           Status
@@ -378,18 +381,28 @@ export default function Relatorios() {
                               )}
                             </div>
                           </td>
-                          {/* Setor separado */}
+                          {/* Localização (Setor e Posto) */}
                           <td className="px-6 py-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                              {item.setor_nome}
-                            </span>
-                          </td>
-                          {/* Posto separado */}
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-600">
-                              {item.posto_entrada_nome}
+                            <div>
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                {item.setor_nome}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1">
+                              Posto: {item.posto_entrada_nome}
                             </div>
                           </td>
+
+                          {/* KM Entrada */}
+                          <td className="px-6 py-4 text-sm font-mono text-gray-600">
+                            {item.km_entrada || "-"}
+                          </td>
+
+                          {/* KM Saída */}
+                          <td className="px-6 py-4 text-sm font-mono text-gray-600">
+                            {item.km_saida || "-"}
+                          </td>
+
                           <td className="px-6 py-4">
                             <span
                               className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
