@@ -470,7 +470,8 @@ export default function Relatorios() {
                           <td className="px-6 py-4 print:px-2 print:py-2">
                             {item.km_saida ? (
                               <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded print:bg-transparent print:text-black">
-                                {item.km_saida - item.km_entrada} km
+                                {(item.km_saida - item.km_entrada).toFixed(2)}{" "}
+                                km
                               </span>
                             ) : (
                               <span className="text-xs font-bold">VIAGEM</span>
