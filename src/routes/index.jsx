@@ -11,6 +11,7 @@ import Usuarios from "../pages/Usuarios";
 import MovimentacoesAcessos from "../pages/MovimentacoesAcessos";
 import MovimentacoesFrota from "../pages/MovimentacoesFrota";
 import Relatorios from "../pages/Relatorios";
+
 import Layout from "../components/Layout";
 import PrivateRoutes from "./PrivateRoutes";
 
@@ -19,22 +20,32 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<SignIn />} />
 
-      {/* Rotas Privadas */}
+      {/* --- GRUPO 1: ACESSO GERAL (Admin e Operador) --- */}
       <Route element={<PrivateRoutes />}>
-        {/* Envolvemos todas as rotas internas no Layout */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/pessoas" element={<Pessoas />} />
-          <Route path="/veiculos" element={<Veiculos />} />
-          <Route path="/setores" element={<Setores />} />
-          <Route path="/postos" element={<Postos />} />
-          <Route path="/usuarios" element={<Usuarios />} />
+
+          {/* Operacional */}
           <Route
             path="/movimentacoes/acessos"
             element={<MovimentacoesAcessos />}
           />
           <Route path="/movimentacoes/frota" element={<MovimentacoesFrota />} />
           <Route path="/relatorios" element={<Relatorios />} />
+
+          {/* Cadastros do Dia a Dia (Operador precisa cadastrar visitantes) */}
+          <Route path="/pessoas" element={<Pessoas />} />
+          <Route path="/veiculos" element={<Veiculos />} />
+        </Route>
+      </Route>
+
+      {/* --- GRUPO 2: EXCLUSIVO ADMIN --- */}
+      {/* Prop tipo_de_usuario="admin"*/}
+      <Route element={<PrivateRoutes tipo="admin" />}>
+        <Route element={<Layout />}>
+          <Route path="/usuarios" element={<Usuarios />} />
+          <Route path="/setores" element={<Setores />} />
+          <Route path="/postos" element={<Postos />} />
         </Route>
       </Route>
 

@@ -17,18 +17,21 @@ export default function Sidebar() {
   const { user, signOut } = useAuth();
   const location = useLocation();
 
+  // Verifica se é admin
+  const isAdmin = user?.tipo_de_usuario === "admin";
+
   // Função auxiliar para verificar se o link está ativo
   const isActive = (path) => {
     return location.pathname === path
-      ? "bg-white text-blue-900 shadow-sm"
-      : "text-gray-700 hover:bg-gray-200";
+      ? "bg-white text-blue-900 shadow-sm" // Item Ativo (Branco com sombra)
+      : "text-gray-700 hover:bg-gray-200"; // Item Inativo (Cinza)
   };
 
   return (
-    <aside className="w-64 bg-gray-100 h-screen flex flex-col border-r border-gray-200">
+    <aside className="w-64 bg-gray-100 h-screen flex flex-col border-r border-gray-200 hidden print:hidden md:flex">
       {/* 1. Logo / Cabeçalho da Sidebar */}
       <div className="p-6 flex items-center gap-2 border-b border-gray-200/50">
-        {/* Simulação do Logo da imagem */}
+        {/* Logo */}
         <div className="w-8 h-8 bg-green-600 rounded-tl-lg rounded-br-lg"></div>
         <div>
           <h1 className="text-xl font-bold text-gray-800 leading-none">
@@ -40,7 +43,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* 2. Menu de Navegação (Com Scroll se precisar) */}
+      {/* 2. Menu de Navegação */}
       <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
         {/* Seção MENU PRINCIPAL */}
         <p className="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2">
@@ -106,32 +109,42 @@ export default function Sidebar() {
           <FaCar /> Veículos
         </Link>
 
-        <Link
-          to="/usuarios"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
-            "/usuarios"
-          )}`}
-        >
-          <FaUser /> Usuários
-        </Link>
+        {/* --- ITENS RESTRITOS AO ADMIN --- */}
+        {isAdmin && (
+          <>
+            <div className="my-4 border-t border-gray-200 mx-3"></div>
+            <p className="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+              Administração
+            </p>
 
-        <Link
-          to="/postos"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
-            "/postos"
-          )}`}
-        >
-          <FaShieldAlt /> Postos de Controle
-        </Link>
+            <Link
+              to="/usuarios"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
+                "/usuarios"
+              )}`}
+            >
+              <FaUser /> Usuários
+            </Link>
 
-        <Link
-          to="/setores"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
-            "/setores"
-          )}`}
-        >
-          <FaBuilding /> Setores
-        </Link>
+            <Link
+              to="/postos"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
+                "/postos"
+              )}`}
+            >
+              <FaShieldAlt /> Postos de Controle
+            </Link>
+
+            <Link
+              to="/setores"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
+                "/setores"
+              )}`}
+            >
+              <FaBuilding /> Setores
+            </Link>
+          </>
+        )}
       </nav>
 
       {/* 3. Rodapé com Perfil do Usuário */}
@@ -144,7 +157,7 @@ export default function Sidebar() {
             <p className="text-sm font-bold text-gray-900 truncate">
               {user?.nome || "Usuário"}
             </p>
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-gray-500 truncate capitalize">
               {user?.tipo_de_usuario === "admin" ? "Administrador" : "Operador"}
             </p>
           </div>
