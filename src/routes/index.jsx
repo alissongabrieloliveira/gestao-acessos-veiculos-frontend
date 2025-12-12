@@ -10,6 +10,7 @@ import Postos from "../pages/Postos";
 import Usuarios from "../pages/Usuarios";
 import MovimentacoesAcessos from "../pages/MovimentacoesAcessos";
 import MovimentacoesFrota from "../pages/MovimentacoesFrota";
+import AcoesMovimentacoes from "../pages/AcoesMovimentacoes";
 import Relatorios from "../pages/Relatorios";
 
 import Layout from "../components/Layout";
@@ -46,6 +47,7 @@ export default function AppRoutes() {
           <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/setores" element={<Setores />} />
           <Route path="/postos" element={<Postos />} />
+          <Route path="/acoes-movimentacoes" element={<AcoesMovimentacoes />} />
         </Route>
       </Route>
 

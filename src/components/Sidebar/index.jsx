@@ -11,6 +11,7 @@ import {
   FaShieldAlt,
   FaBuilding,
   FaSignOutAlt,
+  FaTools,
 } from "react-icons/fa";
 
 export default function Sidebar() {
@@ -142,6 +143,15 @@ export default function Sidebar() {
               )}`}
             >
               <FaBuilding /> Setores
+            </Link>
+
+            <Link
+              to="/acoes-movimentacoes"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
+                "/acoes-movimentacoes"
+              )}`}
+            >
+              <FaTools /> Ações de Movimentações
             </Link>
           </>
         )}
