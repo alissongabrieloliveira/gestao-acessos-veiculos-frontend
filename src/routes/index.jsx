@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 import SignIn from "../pages/SignIn";
+import SignUp from "../pages/SignUp";
 import Dashboard from "../pages/Dashboard";
 import Pessoas from "../pages/Pessoas";
 import Veiculos from "../pages/Veiculos";
@@ -20,6 +21,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<SignIn />} />
+      <Route path="/register" element={<SignUp />} />
 
       {/* --- GRUPO 1: ACESSO GERAL (Admin e Operador) --- */}
       <Route element={<PrivateRoutes />}>

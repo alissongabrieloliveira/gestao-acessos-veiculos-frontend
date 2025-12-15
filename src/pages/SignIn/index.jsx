@@ -8,7 +8,7 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function SignIn() {
   const { signIn } = useAuth();
@@ -138,6 +138,19 @@ export default function SignIn() {
                 "Entrar"
               )}
             </button>
+
+            {/* Botão de Cadastro */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                Não tem acesso?{" "}
+                <Link
+                  to="/register"
+                  className="font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  Crie sua conta
+                </Link>
+              </p>
+            </div>
           </form>
 
           {/* Footer */}
