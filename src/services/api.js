@@ -1,18 +1,18 @@
 import axios from "axios";
 
-// Log para ajudar a debugar se a variável foi carregada corretamente
+// Log para confirmar no navegador se a variável foi carregada
+console.log("Ambiente:", import.meta.env.VITE_API_URL ? "Produção" : "Local");
 console.log(
-  "Conectando na API:",
-  import.meta.env.VITE_API_URL || "Localhost (Dev)"
+  "Conectando em:",
+  import.meta.env.VITE_API_URL || "http://localhost:3333"
 );
 
 const api = axios.create({
-  // Se VITE_API_URL existir (na Vercel), usa ela.
-  // Se não existir (no PC), usa o localhost:3333.
+  // Tenta pegar a variável da Vercel. Se não achar, usa localhost.
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3333",
 });
 
-// Interceptador
+// Interceptador para adicionar o Token automaticamente
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("@App:token");
