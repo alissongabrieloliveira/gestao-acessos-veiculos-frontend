@@ -1,18 +1,21 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000", // Endereço do Backend
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3333",
 });
 
 // Interceptador: Antes de cada requisição, verifique se tem token
-api.interceptors.request.use(async (config) => {
-  const token = localStorage.getItem("@App:token");
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("@App:token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-  return config;
-});
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export default api;
