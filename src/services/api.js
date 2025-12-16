@@ -3,8 +3,7 @@ import axios from "axios";
 console.log("Tentando conectar em:", import.meta.env.VITE_API_URL);
 
 const api = axios.create({
-  // Garante que se a variável estiver vazia, usa o localhost
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3333",
+  baseURL: "https://gestao-acessos-veiculos-api-production.up.railway.app",
 });
 
 // Interceptador: Antes de cada requisição, verifique se tem token
