@@ -1,20 +1,24 @@
 import axios from "axios";
 
-console.log("Tentando conectar em:", import.meta.env.VITE_API_URL);
+// Log para ajudar a debugar se a variável foi carregada corretamente
+console.log(
+  "Conectando na API:",
+  import.meta.env.VITE_API_URL || "Localhost (Dev)"
+);
 
 const api = axios.create({
-  baseURL: "https://gestao-acessos-veiculos-api-production.up.railway.app",
+  // Se VITE_API_URL existir (na Vercel), usa ela.
+  // Se não existir (no PC), usa o localhost:3333.
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3333",
 });
 
-// Interceptador: Antes de cada requisição, verifique se tem token
+// Interceptador
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("@App:token");
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
