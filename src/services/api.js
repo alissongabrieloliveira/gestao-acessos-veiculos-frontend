@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
+  // Garante que se a variável estiver vazia, usa o localhost
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3333",
 });
 
