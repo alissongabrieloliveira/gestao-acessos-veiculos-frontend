@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import Autocomplete from "../../components/Autocomplete";
-import {
-  FaEdit,
-  FaTrash,
-  FaExchangeAlt,
-  FaCar,
-  FaTimes,
-  FaSave,
-  FaFilter,
-} from "react-icons/fa";
+import { FaEdit, FaTrash, FaExchangeAlt, FaCar, FaSave } from "react-icons/fa";
 
 export default function AcoesMovimentacoes() {
   const [activeTab, setActiveTab] = useState("acessos");
@@ -30,8 +22,17 @@ export default function AcoesMovimentacoes() {
     cidades: [],
   });
 
-  // Form Data Genérico (serve para os dois tipos)
+  // Form Data Genérico
   const [formData, setFormData] = useState({});
+
+  // --- FUNÇÃO AUXILIAR PARA DATAS ---
+  // Formata ISO (Banco) para YYYY-MM-DDTHH:MM (Input HTML)
+  const formatDataInput = (dataISO) => {
+    if (!dataISO) return "";
+    const date = new Date(dataISO);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toISOString().slice(0, 16);
+  };
 
   useEffect(() => {
     loadList();
@@ -45,7 +46,7 @@ export default function AcoesMovimentacoes() {
         activeTab === "acessos"
           ? "/movimentacoes/acessos"
           : "/movimentacoes/frota";
-      const response = await api.get(url); // Traz tudo (Adiconar paginação futuramente)
+      const response = await api.get(url);
       setLista(response.data);
     } catch (error) {
       alert("Erro ao carregar lista.");
@@ -55,7 +56,6 @@ export default function AcoesMovimentacoes() {
   }
 
   async function loadAuxData() {
-    // Carrega dados apenas uma vez
     if (auxData.pessoas.length > 0) return;
     try {
       const [p, v, s, pos, c] = await Promise.all([
@@ -104,7 +104,6 @@ export default function AcoesMovimentacoes() {
     if (activeTab === "acessos") {
       setFormData({
         id_pessoa: item.id_pessoa,
-        // Busca objeto completo nas listas auxiliares para o Autocomplete funcionar visualmente
         pessoaObj: auxData.pessoas.find((p) => p.id === item.id_pessoa),
         veiculoObj: auxData.veiculos.find((v) => v.id === item.id_veiculo),
         id_veiculo: item.id_veiculo,
@@ -115,6 +114,9 @@ export default function AcoesMovimentacoes() {
         km_saida: item.km_saida || "",
         motivo_da_visita: item.motivo_da_visita || "",
         observacao: item.observacao || "",
+        // NOVOS CAMPOS DE DATA
+        data_hora_entrada: item.data_hora_entrada,
+        data_hora_saida: item.data_hora_saida,
       });
     } else {
       // Frota
@@ -124,12 +126,15 @@ export default function AcoesMovimentacoes() {
         veiculoObj: auxData.veiculos.find((v) => v.id === item.id_veiculo),
         id_veiculo: item.id_veiculo,
         id_cidade_de_destino: item.id_cidade_de_destino,
-        id_posto_controle_entrada: item.id_posto_controle_entrada, // Posto Saída
-        id_posto_controle_saida: item.id_posto_controle_saida || "", // Posto Chegada
-        km_entrada: item.km_entrada, // KM Saída
-        km_saida: item.km_saida || "", // KM Chegada
+        id_posto_controle_entrada: item.id_posto_controle_entrada,
+        id_posto_controle_saida: item.id_posto_controle_saida || "",
+        km_entrada: item.km_entrada,
+        km_saida: item.km_saida || "",
         motivo_saida: item.motivo_saida || "",
         observacao: item.observacao || "",
+        // NOVOS CAMPOS DE DATA
+        data_hora_entrada: item.data_hora_entrada,
+        data_hora_saida: item.data_hora_saida,
       });
     }
     setShowModal(true);
@@ -323,6 +328,46 @@ export default function AcoesMovimentacoes() {
                       })
                     }
                     displayKey="placa"
+                  />
+                </div>
+              </div>
+
+              {/* --- NOVO BLOCO DE DATAS (INSERIDO) --- */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-yellow-50 p-3 rounded border border-yellow-200">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    {editType === "acessos"
+                      ? "Data/Hora Entrada"
+                      : "Data Saída (Início)"}
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500"
+                    value={formatDataInput(formData.data_hora_entrada)}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        data_hora_entrada: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    {editType === "acessos"
+                      ? "Data/Hora Saída"
+                      : "Data Retorno (Chegada)"}
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500"
+                    value={formatDataInput(formData.data_hora_saida)}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        data_hora_saida: e.target.value,
+                      })
+                    }
                   />
                 </div>
               </div>
