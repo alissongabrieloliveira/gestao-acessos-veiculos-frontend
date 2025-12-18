@@ -8,12 +8,10 @@ export default function AcoesMovimentacoes() {
   const [lista, setLista] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Estados para Modal de Edição
   const [showModal, setShowModal] = useState(false);
-  const [editType, setEditType] = useState(""); // 'acessos' ou 'frota'
+  const [editType, setEditType] = useState("");
   const [currentItem, setCurrentItem] = useState(null);
 
-  // Dados auxiliares para os Selects do Modal
   const [auxData, setAuxData] = useState({
     pessoas: [],
     veiculos: [],
@@ -22,16 +20,35 @@ export default function AcoesMovimentacoes() {
     cidades: [],
   });
 
-  // Form Data Genérico
   const [formData, setFormData] = useState({});
 
-  // --- FUNÇÃO AUXILIAR PARA DATAS ---
-  // Formata ISO (Banco) para YYYY-MM-DDTHH:MM (Input HTML)
-  const formatDataInput = (dataISO) => {
-    if (!dataISO) return "";
-    const date = new Date(dataISO);
-    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-    return date.toISOString().slice(0, 16);
+  // --- CORREÇÃO 1: Função para VISUALIZAÇÃO (UTC -> Input Local) ---
+  // Pega o UTC do banco e transforma em string YYYY-MM-DDTHH:MM local
+  const formatDataToLocalInput = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+
+    // Obtém partes da data localmente
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // --- CORREÇÃO 2: Função para ALTERAÇÃO (Input Local -> UTC) ---
+  // Pega o valor do input (Local) e transforma em ISO String (UTC) para o banco
+  const handleDateChange = (field, value) => {
+    if (!value) {
+      setFormData({ ...formData, [field]: null });
+      return;
+    }
+    // O navegador cria 'date' usando o fuso local do usuário
+    const date = new Date(value);
+    // .toISOString() converte automaticamente para UTC (+3h em relação ao Brasil)
+    setFormData({ ...formData, [field]: date.toISOString() });
   };
 
   useEffect(() => {
@@ -101,6 +118,8 @@ export default function AcoesMovimentacoes() {
     setCurrentItem(item);
     setEditType(activeTab);
 
+    // Configura os dados iniciais.
+    // Nota: As datas já vêm em UTC do banco, mantem elas assim no state.
     if (activeTab === "acessos") {
       setFormData({
         id_pessoa: item.id_pessoa,
@@ -114,12 +133,10 @@ export default function AcoesMovimentacoes() {
         km_saida: item.km_saida || "",
         motivo_da_visita: item.motivo_da_visita || "",
         observacao: item.observacao || "",
-        // NOVOS CAMPOS DE DATA
         data_hora_entrada: item.data_hora_entrada,
         data_hora_saida: item.data_hora_saida,
       });
     } else {
-      // Frota
       setFormData({
         id_pessoa: item.id_pessoa,
         pessoaObj: auxData.pessoas.find((p) => p.id === item.id_pessoa),
@@ -132,7 +149,6 @@ export default function AcoesMovimentacoes() {
         km_saida: item.km_saida || "",
         motivo_saida: item.motivo_saida || "",
         observacao: item.observacao || "",
-        // NOVOS CAMPOS DE DATA
         data_hora_entrada: item.data_hora_entrada,
         data_hora_saida: item.data_hora_saida,
       });
@@ -148,6 +164,7 @@ export default function AcoesMovimentacoes() {
           ? `/movimentacoes/acessos/${currentItem.id}`
           : `/movimentacoes/frota/${currentItem.id}`;
 
+      // O formData já contém as datas convertidas para UTC
       await api.put(url, formData);
       alert("Registro atualizado com sucesso!");
       setShowModal(false);
@@ -170,7 +187,6 @@ export default function AcoesMovimentacoes() {
           </p>
         </div>
 
-        {/* Tabs */}
         <div className="bg-white p-1.5 rounded-xl shadow-sm border border-gray-200 flex">
           <button
             onClick={() => setActiveTab("acessos")}
@@ -195,7 +211,6 @@ export default function AcoesMovimentacoes() {
         </div>
       </div>
 
-      {/* Tabela de Registros */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-gray-500">
@@ -271,7 +286,6 @@ export default function AcoesMovimentacoes() {
         )}
       </div>
 
-      {/* --- MODAL DE EDIÇÃO --- */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8">
@@ -292,7 +306,6 @@ export default function AcoesMovimentacoes() {
               onSubmit={handleSave}
               className="p-6 space-y-4 max-h-[80vh] overflow-y-auto no-scrollbar"
             >
-              {/* --- CAMPOS COMUNS (Pessoa e Veículo) --- */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Autocomplete
@@ -332,7 +345,7 @@ export default function AcoesMovimentacoes() {
                 </div>
               </div>
 
-              {/* --- NOVO BLOCO DE DATAS (INSERIDO) --- */}
+              {/* --- BLOCO DE DATAS CORRIGIDO --- */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-yellow-50 p-3 rounded border border-yellow-200">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
@@ -343,12 +356,11 @@ export default function AcoesMovimentacoes() {
                   <input
                     type="datetime-local"
                     className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500"
-                    value={formatDataInput(formData.data_hora_entrada)}
+                    // USA FORMATADOR DE VISUALIZAÇÃO
+                    value={formatDataToLocalInput(formData.data_hora_entrada)}
+                    // USA FORMATADOR DE ALTERAÇÃO (Para UTC)
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        data_hora_entrada: e.target.value,
-                      })
+                      handleDateChange("data_hora_entrada", e.target.value)
                     }
                   />
                 </div>
@@ -361,18 +373,14 @@ export default function AcoesMovimentacoes() {
                   <input
                     type="datetime-local"
                     className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500"
-                    value={formatDataInput(formData.data_hora_saida)}
+                    value={formatDataToLocalInput(formData.data_hora_saida)}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        data_hora_saida: e.target.value,
-                      })
+                      handleDateChange("data_hora_saida", e.target.value)
                     }
                   />
                 </div>
               </div>
 
-              {/* --- CAMPOS ESPECÍFICOS: ACESSOS --- */}
               {editType === "acessos" && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -495,7 +503,6 @@ export default function AcoesMovimentacoes() {
                 </>
               )}
 
-              {/* --- CAMPOS ESPECÍFICOS: FROTA --- */}
               {editType === "frota" && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
