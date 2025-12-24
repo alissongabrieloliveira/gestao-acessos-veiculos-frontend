@@ -14,7 +14,8 @@ import {
   FaTools,
 } from "react-icons/fa";
 
-export default function Sidebar() {
+// 1. Recebe a função onClose (que vem do Layout)
+export default function Sidebar({ onClose }) {
   const { user, signOut } = useAuth();
   const location = useLocation();
 
@@ -24,6 +25,12 @@ export default function Sidebar() {
     return location.pathname === path
       ? "bg-white text-blue-900 shadow-sm"
       : "text-gray-700 hover:bg-gray-200";
+  };
+
+  // Função auxiliar para evitar repetição no onClick
+  // Se onClose existir (no mobile), ele executa. No desktop, não faz nada.
+  const handleLinkClick = () => {
+    if (onClose) onClose();
   };
 
   return (
@@ -47,13 +54,13 @@ export default function Sidebar() {
 
       {/* 2. Menu de Navegação */}
       <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
-        {/* Seção MENU PRINCIPAL */}
         <p className="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2">
           Menu Principal
         </p>
 
         <Link
           to="/dashboard"
+          onClick={handleLinkClick}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
             "/dashboard"
           )}`}
@@ -63,6 +70,7 @@ export default function Sidebar() {
 
         <Link
           to="/movimentacoes/acessos"
+          onClick={handleLinkClick}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
             "/movimentacoes/acessos"
           )}`}
@@ -72,6 +80,7 @@ export default function Sidebar() {
 
         <Link
           to="/movimentacoes/frota"
+          onClick={handleLinkClick}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
             "/movimentacoes/frota"
           )}`}
@@ -81,6 +90,7 @@ export default function Sidebar() {
 
         <Link
           to="/relatorios"
+          onClick={handleLinkClick}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
             "/relatorios"
           )}`}
@@ -88,13 +98,13 @@ export default function Sidebar() {
           <FaFileAlt /> Relatórios
         </Link>
 
-        {/* Seção CADASTROS */}
         <p className="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 mt-8">
           Cadastros
         </p>
 
         <Link
           to="/pessoas"
+          onClick={handleLinkClick}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
             "/pessoas"
           )}`}
@@ -104,6 +114,7 @@ export default function Sidebar() {
 
         <Link
           to="/veiculos"
+          onClick={handleLinkClick}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
             "/veiculos"
           )}`}
@@ -111,7 +122,6 @@ export default function Sidebar() {
           <FaCar /> Veículos
         </Link>
 
-        {/* --- ITENS RESTRITOS AO ADMIN --- */}
         {isAdmin && (
           <>
             <div className="my-4 border-t border-gray-200 mx-3"></div>
@@ -121,6 +131,7 @@ export default function Sidebar() {
 
             <Link
               to="/usuarios"
+              onClick={handleLinkClick}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
                 "/usuarios"
               )}`}
@@ -130,6 +141,7 @@ export default function Sidebar() {
 
             <Link
               to="/postos"
+              onClick={handleLinkClick}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
                 "/postos"
               )}`}
@@ -139,6 +151,7 @@ export default function Sidebar() {
 
             <Link
               to="/setores"
+              onClick={handleLinkClick}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
                 "/setores"
               )}`}
@@ -148,6 +161,7 @@ export default function Sidebar() {
 
             <Link
               to="/acoes-movimentacoes"
+              onClick={handleLinkClick}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive(
                 "/acoes-movimentacoes"
               )}`}
@@ -158,7 +172,6 @@ export default function Sidebar() {
         )}
       </nav>
 
-      {/* 3. Rodapé com Perfil do Usuário */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-lg font-bold text-gray-600 shadow-sm border border-gray-100">

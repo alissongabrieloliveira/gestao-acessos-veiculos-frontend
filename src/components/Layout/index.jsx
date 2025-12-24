@@ -33,7 +33,8 @@ export default function Layout() {
           <FaTimes />
         </button>
 
-        <Sidebar />
+        {/* Função que fecha o menu para dentro do componente Sidebar (Só no Mobile) */}
+        <Sidebar onClose={() => setIsSidebarOpen(false)} />
       </div>
 
       {/* --- 3. ÁREA DE CONTEÚDO --- */}
