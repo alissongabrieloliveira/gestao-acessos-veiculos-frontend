@@ -12,67 +12,52 @@
   scrollbar-width: none; /* Firefox */
 }
 
-/* --- Configuração de Impressão (PDF) --- */
+/* --- Configuração de Impressão (PDF PROFISSIONAL) --- */
 @media print {
-  /* 1. FORÇA A ORIENTAÇÃO PAISAGEM (ESSENCIAL PARA TABELAS) */
   @page {
     size: landscape;
-    margin: 10mm; /* Margem de segurança para não cortar na impressora */
+    margin: 10mm;
   }
 
-  /* 2. Esconde elementos de navegação e interface */
+  /* ... (regras de esconder aside, input, etc) ... */
   aside,
   button,
   nav,
-  .print\:hidden,
   input,
   select,
-  label {
+  label,
+  .print\:hidden {
     display: none !important;
   }
 
-  /* 3. Reseta o Layout para ocupar 100% da folha */
-  body,
-  #root,
-  main,
-  div {
-    background-color: white !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    height: auto !important;
-    width: 100% !important;
-    overflow: visible !important;
-  }
-
-  /* 4. Estilização da Tabela para Papel */
+  /* ESTILOS DA TABELA - APENAS PARA IMPRESSÃO */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 9pt !important; /* Diminuí levemente para garantir que caiba tudo */
+    font-size: 9pt !important;
+    font-family: sans-serif !important;
   }
 
-  th,
-  td {
-    border: 1px solid #9ca3af !important; /* Cinza um pouco mais escuro para nitidez */
-    padding: 6px !important;
-    color: black !important;
-  }
-
+  /* Cabeçalho PRETO apenas na impressora */
   thead th {
-    background-color: #e5e7eb !important;
-    color: black !important;
+    background-color: #111827 !important; /* Preto */
+    color: white !important; /* Texto Branco */
+    border: 1px solid #000 !important;
+    padding: 6px !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* 5. Evita quebra de linha no meio de um registro */
-  tr {
-    page-break-inside: avoid;
+  td {
+    border-bottom: 1px solid #ccc !important;
+    padding: 4px !important;
+    color: black !important;
   }
 
-  /* Remove links azuis na impressão */
-  a {
-    text-decoration: none;
-    color: black;
+  /* Zebrado apenas na impressora */
+  tr:nth-child(even) td {
+    background-color: #f3f4f6 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

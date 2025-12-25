@@ -9,7 +9,6 @@ import {
   FaCar,
   FaUser,
   FaExchangeAlt,
-  FaShieldAlt,
 } from "react-icons/fa";
 
 export default function Relatorios() {
@@ -23,7 +22,6 @@ export default function Relatorios() {
   const [resultados, setResultados] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Guardamos os filtros usados para mostrar no PDF
   const [filtrosUsados, setFiltrosUsados] = useState(null);
 
   async function handleGerarRelatorio(e) {
@@ -47,7 +45,6 @@ export default function Relatorios() {
       const response = await api.get(url, { params });
       setResultados(response.data);
 
-      // Salva os filtros para o cabeçalho do PDF
       setFiltrosUsados({
         tipo:
           tipoRelatorio === "acessos"
@@ -57,8 +54,9 @@ export default function Relatorios() {
           ? new Date(dataInicio).toLocaleDateString()
           : "Início",
         fim: dataFim ? new Date(dataFim).toLocaleDateString() : "Hoje",
-        nome: buscaNome,
-        placa: buscaPlaca,
+        nome: buscaNome || "Todos",
+        placa: buscaPlaca || "Todas",
+        total: response.data.length,
       });
     } catch (error) {
       console.error(error);
@@ -83,82 +81,71 @@ export default function Relatorios() {
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-10">
-      {/* Cabeçalho de Impressão (SÓ APARECE NO PDF) Este bloco usa a classe 'hidden print:block'*/}
-      <div className="hidden print:block mb-8 border-b-2 border-gray-800 pb-4">
-        <div className="flex justify-between items-start">
+      {/* --- CABEÇALHO CORPORATIVO (SÓ NO PDF) --- */}
+      <div className="hidden print:block font-sans text-gray-900 mb-4">
+        <div className="flex justify-between items-end border-b-2 border-black pb-2 mb-4">
           <div className="flex items-center gap-4">
-            {/* Simulação de Logo */}
-            <div className="w-16 h-16 bg-gray-800 text-white flex items-center justify-center rounded-lg text-2xl font-bold">
-              P
+            <div className="w-12 h-12 bg-black text-white flex items-center justify-center font-bold text-2xl rounded-sm">
+              G
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">PORTARIA PRO</h1>
-              <p className="text-sm text-gray-600">
-                Sistema de Gestão de Segurança e Frota
+              <h1 className="text-2xl font-bold uppercase tracking-tight">
+                Gestão de Acesso
+              </h1>
+              <p className="text-[10px] text-gray-600 uppercase tracking-widest">
+                Segurança com Simplicidade
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <h2 className="text-xl font-bold uppercase text-gray-800">
-              Relatório Analítico
-            </h2>
-            <p className="text-sm text-gray-500">
-              Gerado em: {new Date().toLocaleString()}
+          <div className="text-right text-xs">
+            <p>
+              <strong>Relatório Analítico</strong>
             </p>
+            <p>Emissão: {new Date().toLocaleString()}</p>
           </div>
         </div>
 
-        {/* Resumo dos Filtros no Papel */}
+        {/* Resumo dos Filtros (SÓ NO PDF) */}
         {filtrosUsados && (
-          <div className="mt-6 bg-gray-100 p-4 rounded border border-gray-300 grid grid-cols-2 gap-4 text-sm">
+          <div className="bg-gray-100 border border-gray-300 p-2 text-[10px] grid grid-cols-4 gap-4 mb-4">
             <div>
-              <p>
-                <strong className="text-gray-700">Tipo:</strong>{" "}
-                {filtrosUsados.tipo}
-              </p>
-              <p>
-                <strong className="text-gray-700">Período:</strong>{" "}
-                {filtrosUsados.inicio} até {filtrosUsados.fim}
-              </p>
+              <strong>RELATÓRIO:</strong> {filtrosUsados.tipo}
             </div>
-            <div className="text-right">
-              {filtrosUsados.nome && (
-                <p>
-                  Filtro Nome: <strong>{filtrosUsados.nome}</strong>
-                </p>
-              )}
-              {filtrosUsados.placa && (
-                <p>
-                  Filtro Placa: <strong>{filtrosUsados.placa}</strong>
-                </p>
-              )}
+            <div>
+              <strong>PERÍODO:</strong> {filtrosUsados.inicio} a{" "}
+              {filtrosUsados.fim}
+            </div>
+            <div>
+              <strong>FILTRO:</strong> {filtrosUsados.nome}/
+              {filtrosUsados.placa}
+            </div>
+            <div>
+              <strong>TOTAL:</strong> {filtrosUsados.total} registros
             </div>
           </div>
         )}
       </div>
 
-      {/* Interface de Tela (Some na impressão graças ao CSS global em index.css) */}
-
-      {/* Cabeçalho Tela */}
+      {/* --- INTERFACE DE TELA (WEB) --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 print:hidden">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
             Relatórios
           </h1>
           <p className="text-gray-500 mt-1">
-            Extraia dados e audite as movimentações do sistema.
+            Extraia dados e audite as movimentações.
           </p>
         </div>
         <button
           onClick={handlePrint}
           disabled={resultados.length === 0}
-          className="bg-gray-900 hover:bg-black text-white px-5 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:shadow-none font-medium"
+          className="bg-gray-900 hover:bg-black text-white px-5 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md font-medium disabled:opacity-50"
         >
-          <FaFilePdf className="text-red-400" /> Exportar PDF
+          <FaFilePdf className="text-red-400" /> Imprimir PDF
         </button>
       </div>
 
-      {/* Card de Filtros */}
+      {/* Filtros de Busca (WEB) */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8 print:hidden">
         <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
           <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
@@ -169,7 +156,6 @@ export default function Relatorios() {
 
         <form onSubmit={handleGerarRelatorio}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Coluna 1: Tipo e Datas */}
             <div className="lg:col-span-5 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
@@ -180,7 +166,7 @@ export default function Relatorios() {
                     <FaExchangeAlt />
                   </div>
                   <select
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none appearance-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
                     value={tipoRelatorio}
                     onChange={(e) => {
                       setTipoRelatorio(e.target.value);
@@ -231,7 +217,6 @@ export default function Relatorios() {
 
             <div className="hidden lg:block w-px bg-gray-200 mx-auto h-full"></div>
 
-            {/* Coluna 2: Busca Específica */}
             <div className="lg:col-span-6 flex flex-col justify-between">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -301,196 +286,201 @@ export default function Relatorios() {
         </form>
       </div>
 
-      {/* Área de Resultados (TABELA)*/}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden print:shadow-none print:border-2 print:border-gray-300 min-h-[300px]">
-        {resultados.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center py-20 text-gray-400 print:hidden">
-            <div
-              className={`p-4 rounded-full mb-4 ${
-                filtrosUsados ? "bg-red-50 text-red-400" : "bg-gray-50"
-              }`}
-            >
-              {filtrosUsados ? <FaSearch size={32} /> : <FaFilter size={32} />}
-            </div>
-            <p className="text-lg font-medium text-gray-500">
-              {filtrosUsados
-                ? "Nenhum registro encontrado."
-                : "Utilize os filtros para gerar o relatório."}
-            </p>
-          </div>
-        ) : (
-          <div>
-            <div className="bg-gray-50 px-6 py-3 border-b border-gray-100 flex justify-between items-center print:hidden">
-              <span className="text-sm font-medium text-gray-500">
-                Registros encontrados:
-              </span>
-              <span className="bg-white border border-gray-200 text-gray-800 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                {resultados.length}
-              </span>
-            </div>
+      {/* --- TABELA DE RESULTADOS --- */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden print:shadow-none print:border-none">
+        {resultados.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-gray-50 border-b border-gray-200 print:bg-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:px-1 print:py-1 print:text-black">
+                    Data/Hora
+                  </th>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50 border-b border-gray-200 print:bg-gray-200">
-                  <tr>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                      Data/Hora
-                    </th>
+                  {tipoRelatorio === "acessos" ? (
+                    <>
+                      <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:px-1 print:py-1 print:text-black">
+                        {/* TELA */}{" "}
+                        <span className="print:hidden">Pessoa / Veículo</span>
+                        {/* PDF */}{" "}
+                        <span className="hidden print:block">
+                          Identificação
+                        </span>
+                      </th>
+                      <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:px-1 print:py-1 print:text-black">
+                        {/* TELA */}{" "}
+                        <span className="print:hidden">Localização</span>
+                        {/* PDF */}{" "}
+                        <span className="hidden print:block">Setor/Posto</span>
+                      </th>
+                      <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center print:px-1 print:py-1 print:text-black">
+                        {/* TELA */}{" "}
+                        <span className="print:hidden">Quilometragem (KM)</span>
+                        {/* PDF */}{" "}
+                        <span className="hidden print:block">KM E/S</span>
+                      </th>
+                      <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center print:px-1 print:py-1 print:text-black">
+                        Status
+                      </th>
+                    </>
+                  ) : (
+                    <>
+                      <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:px-1 print:py-1 print:text-black">
+                        {/* TELA */}{" "}
+                        <span className="print:hidden">
+                          Motorista / Veículo
+                        </span>
+                        {/* PDF */}{" "}
+                        <span className="hidden print:block">
+                          Condutor/Veículo
+                        </span>
+                      </th>
+                      <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:px-1 print:py-1 print:text-black">
+                        Destino
+                      </th>
+                      <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center print:px-1 print:py-1 print:text-black">
+                        {/* TELA */}{" "}
+                        <span className="print:hidden">Quilometragem (KM)</span>
+                        {/* PDF */}{" "}
+                        <span className="hidden print:block">KM E/S</span>
+                      </th>
+                      <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center print:px-1 print:py-1 print:text-black">
+                        Total
+                      </th>
+                    </>
+                  )}
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-gray-100">
+                {resultados.map((item, index) => (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-blue-50/30 transition-colors"
+                  >
+                    {/* DATA */}
+                    <td className="px-6 py-4 whitespace-nowrap print:px-1 print:py-1 border-b print:border-gray-300">
+                      <div className="text-sm font-bold text-gray-900">
+                        {new Date(item.data_hora_entrada).toLocaleDateString()}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(item.data_hora_entrada)
+                          .toLocaleTimeString()
+                          .slice(0, 5)}
+                        {item.data_hora_saida &&
+                          ` - ${new Date(item.data_hora_saida)
+                            .toLocaleTimeString()
+                            .slice(0, 5)}`}
+                      </div>
+                    </td>
 
                     {tipoRelatorio === "acessos" ? (
                       <>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          Pessoa / Veículo
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          Localização
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          KM Ent.
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          KM Sai.
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          Status
-                        </th>
+                        <td className="px-6 py-4 print:px-1 print:py-1 border-b print:border-gray-300">
+                          <div className="text-sm font-medium text-gray-900">
+                            {item.pessoa_nome}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {item.veiculo_placa
+                              ? `${item.veiculo_modelo} (${item.veiculo_placa})`
+                              : "A pé"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 print:px-1 print:py-1 border-b print:border-gray-300">
+                          <div className="text-sm text-gray-900">
+                            {item.setor_nome}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {item.posto_entrada_nome}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center print:px-1 print:py-1 border-b print:border-gray-300">
+                          <div className="text-xs font-mono">
+                            E: {item.km_entrada || "-"}
+                          </div>
+                          <div className="text-xs font-mono">
+                            S: {item.km_saida || "-"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center print:px-1 print:py-1 border-b print:border-gray-300">
+                          <span
+                            className={`print:hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              item.status === "patio"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {item.status.toUpperCase()}
+                          </span>
+                          <span className="hidden print:block text-xs font-bold">
+                            {item.status.toUpperCase()}
+                          </span>
+                        </td>
                       </>
                     ) : (
                       <>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          Motorista / Veículo
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          Destino
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          KM Saída
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          KM Cheg.
-                        </th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider print:text-black print:border print:border-gray-400">
-                          Total
-                        </th>
+                        {/* --- CELULAS DE FROTA --- */}
+                        <td className="px-6 py-4 print:px-1 print:py-1 border-b print:border-gray-300">
+                          <div className="text-sm font-medium text-gray-900">
+                            {item.motorista_nome}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {item.modelo} ({item.placa})
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 print:px-1 print:py-1 border-b print:border-gray-300">
+                          <div className="text-sm text-gray-900">
+                            {item.cidade_destino}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center print:px-1 print:py-1 border-b print:border-gray-300">
+                          <div className="text-xs font-mono">
+                            S: {item.km_entrada}
+                          </div>
+                          <div className="text-xs font-mono">
+                            C: {item.km_saida || "-"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center print:px-1 print:py-1 border-b print:border-gray-300">
+                          {item.km_saida ? (
+                            <span className="font-bold text-sm">
+                              {(item.km_saida - item.km_entrada).toFixed(0)} km
+                            </span>
+                          ) : (
+                            <span className="text-xs font-bold text-yellow-700 bg-yellow-50 px-2 py-1 rounded print:text-black print:bg-transparent print:border print:border-black">
+                              EM VIAGEM
+                            </span>
+                          )}
+                        </td>
                       </>
                     )}
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 print:divide-gray-300">
-                  {resultados.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-blue-50/30 transition-colors print:border-b print:border-gray-300"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap print:px-2 print:py-2">
-                        <div className="text-sm font-bold text-gray-900">
-                          {new Date(
-                            item.data_hora_entrada
-                          ).toLocaleDateString()}
-                        </div>
-                        <div className="text-xs text-gray-500 print:text-black">
-                          {new Date(item.data_hora_entrada)
-                            .toLocaleTimeString()
-                            .slice(0, 5)}
-                          {item.data_hora_saida &&
-                            ` - ${new Date(item.data_hora_saida)
-                              .toLocaleTimeString()
-                              .slice(0, 5)}`}
-                        </div>
-                      </td>
-
-                      {tipoRelatorio === "acessos" ? (
-                        <>
-                          <td className="px-6 py-4 print:px-2 print:py-2">
-                            <div className="text-sm font-medium text-gray-900">
-                              {item.pessoa_nome}
-                            </div>
-                            <div className="text-xs text-gray-500 flex items-center gap-1 print:text-black">
-                              {item.veiculo_placa ? (
-                                <>
-                                  {item.veiculo_modelo} ({item.veiculo_placa})
-                                </>
-                              ) : (
-                                <>A pé</>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 print:px-2 print:py-2">
-                            <div>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 print:bg-transparent print:text-black print:border print:border-black print:p-0">
-                                {item.setor_nome}
-                              </span>
-                            </div>
-                            <div className="text-xs text-gray-400 mt-1 print:text-black">
-                              Posto: {item.posto_entrada_nome}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-sm font-mono text-gray-600 print:px-2 print:py-2 print:text-black">
-                            {item.km_entrada || "-"}
-                          </td>
-                          <td className="px-6 py-4 text-sm font-mono text-gray-600 print:px-2 print:py-2 print:text-black">
-                            {item.km_saida || "-"}
-                          </td>
-                          <td className="px-6 py-4 print:px-2 print:py-2">
-                            <span
-                              className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full print:bg-transparent print:text-black print:border print:border-black ${
-                                item.status === "patio"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-green-100 text-green-800"
-                              }`}
-                            >
-                              {item.status.toUpperCase()}
-                            </span>
-                          </td>
-                        </>
-                      ) : (
-                        <>
-                          <td className="px-6 py-4 print:px-2 print:py-2">
-                            <div className="text-sm font-medium text-gray-900">
-                              {item.motorista_nome}
-                            </div>
-                            <div className="text-xs text-gray-500 flex items-center gap-1 print:text-black">
-                              {item.modelo} ({item.placa})
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 print:px-2 print:py-2">
-                            <div className="text-sm text-gray-900 font-medium">
-                              {item.cidade_destino}
-                            </div>
-                            <div className="text-xs text-gray-500 print:text-black">
-                              {item.cidade_uf}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900 font-mono print:px-2 print:py-2">
-                            {item.km_entrada}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900 font-mono print:px-2 print:py-2">
-                            {item.km_saida || "---"}
-                          </td>
-                          <td className="px-6 py-4 print:px-2 print:py-2">
-                            {item.km_saida ? (
-                              <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded print:bg-transparent print:text-black">
-                                {(item.km_saida - item.km_entrada).toFixed(2)}{" "}
-                                km
-                              </span>
-                            ) : (
-                              <span className="text-xs font-bold">VIAGEM</span>
-                            )}
-                          </td>
-                        </>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
 
+      {/* Assinaturas (SÓ NO PDF) */}
+      <div className="hidden print:grid grid-cols-2 gap-20 mt-16 px-10 text-gray-900">
+        <div className="text-center">
+          <div className="border-b border-black mb-2"></div>
+          <p className="font-bold text-xs uppercase">
+            Responsável pela Emissão
+          </p>
+        </div>
+        <div className="text-center">
+          <div className="border-b border-black mb-2"></div>
+          <p className="font-bold text-xs uppercase">
+            Responsável pela Auditoria
+          </p>
+        </div>
+      </div>
+
       {/* Rodapé Impressão */}
       <div className="hidden print:block mt-8 text-center text-xs text-gray-500 border-t border-gray-300 pt-2">
-        Documento gerado eletronicamente.
+        Documento gerado eletronicamente por Gestão de Acesso.
       </div>
     </div>
   );
