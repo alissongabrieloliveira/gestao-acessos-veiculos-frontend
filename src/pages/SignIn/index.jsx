@@ -52,10 +52,10 @@ export default function SignIn() {
             <FaUserShield size={32} />
           </div>
           <h1 className="text-2xl font-black text-gray-900 uppercase tracking-wider">
-            Portaria
+            Gestão de Acesso
           </h1>
           <p className="text-gray-500 text-sm font-mono tracking-tight mt-1">
-            Sistema de Gerenciamento de Acessos
+            Segurança com Simplicidade.
           </p>
         </div>
 

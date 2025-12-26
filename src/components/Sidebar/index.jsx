@@ -14,7 +14,9 @@ import {
   FaTools,
 } from "react-icons/fa";
 
-// 1. Recebe a função onClose (que vem do Layout)
+// logo
+import logoImg from "../../assets/logo.png";
+
 export default function Sidebar({ onClose }) {
   const { user, signOut } = useAuth();
   const location = useLocation();
@@ -27,27 +29,27 @@ export default function Sidebar({ onClose }) {
       : "text-gray-700 hover:bg-gray-200";
   };
 
-  // Função auxiliar para evitar repetição no onClick
-  // Se onClose existir (no mobile), ele executa. No desktop, não faz nada.
   const handleLinkClick = () => {
     if (onClose) onClose();
   };
 
   return (
-    // Ajustes da sidebar:
-    // 1. Remoção do'hidden' e 'md:flex' (agora aparece sempre que for chamado)
-    // 2. Ajuste no w-64 para w-full (para preencher o wrapper do Layout)
-    // 3. Ajuste no h-screen para h-full (para respeitar a altura do pai)
     <aside className="w-full h-full bg-gray-100 flex flex-col border-r border-gray-200 print:hidden">
       {/* 1. Logo / Cabeçalho da Sidebar */}
-      <div className="p-6 flex items-center gap-2 border-b border-gray-200/50">
-        <div className="w-8 h-8 bg-green-600 rounded-tl-lg rounded-br-lg"></div>
-        <div>
-          <h1 className="text-xl font-bold text-gray-800 leading-none">
-            Portaria
+      <div className="p-6 flex items-center gap-3 border-b border-gray-200/50">
+        <img
+          src={logoImg}
+          alt="Logo Gestão de Acesso"
+          className="w-10 h-10 object-contain"
+        />
+
+        <div className="flex-1 min-w-0">
+          {" "}
+          <h1 className="text-lg font-bold text-gray-800 leading-tight whitespace-nowrap">
+            Gestão de Acesso
           </h1>
-          <p className="text-xs text-gray-500 font-medium">
-            Controle de Acesso.
+          <p className="text-[11px] text-gray-500 font-medium mt-0.5 whitespace-nowrap">
+            Segurança com Simplicidade.
           </p>
         </div>
       </div>
