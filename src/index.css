@@ -12,25 +12,44 @@
   scrollbar-width: none; /* Firefox */
 }
 
-/* --- Configuração de Impressão (PDF PROFISSIONAL) --- */
+/* --- Configuração de Impressão (PDF PROFISSIONAL & MULTIPÁGINAS) --- */
 @media print {
   @page {
     size: landscape;
     margin: 10mm;
   }
 
-  /* ... (regras de esconder aside, input, etc) ... */
+  /* 1. ZERA TUDO QUE POSSA CAUSAR PÁGINA EXTRA */
+  html,
+  body,
+  #root,
+  main,
+  .min-h-screen,
+  .h-screen,
+  .pb-10 {
+    background-color: white !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+    display: block !important;
+  }
+
+  /* 2. OCULTA A INTERFACE */
   aside,
-  button,
   nav,
+  button,
   input,
   select,
   label,
+  header,
   .print\:hidden {
     display: none !important;
   }
 
-  /* ESTILOS DA TABELA - APENAS PARA IMPRESSÃO */
+  /* 3. TABELA LIMPA */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -38,10 +57,17 @@
     font-family: sans-serif !important;
   }
 
-  /* Cabeçalho PRETO apenas na impressora */
+  thead {
+    display: table-header-group;
+  }
+  tbody {
+    display: table-row-group;
+  }
+
+  /* Cabeçalhos Pretos */
   thead th {
-    background-color: #111827 !important; /* Preto */
-    color: white !important; /* Texto Branco */
+    background-color: #111827 !important;
+    color: white !important;
     border: 1px solid #000 !important;
     padding: 6px !important;
     -webkit-print-color-adjust: exact;
@@ -54,10 +80,15 @@
     color: black !important;
   }
 
-  /* Zebrado apenas na impressora */
   tr:nth-child(even) td {
     background-color: #f3f4f6 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  /* Impede quebra de linha no meio do registro */
+  tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }
